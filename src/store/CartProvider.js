@@ -1,49 +1,47 @@
-import react,{ useReducer,useState } from 'react';
-
-import CartContext from './cart-context';
-
-// const defaultCartState = {
-//   items: [],
-//   totalAmount: 0
-// };
-
-// const cartReducer = (state, action) => {
-//   if (action.type === 'ADD') {
-//     const updatedItems = state.items.concat(action.item);
-//     const updatedTotalAmount = state.totalAmount + action.item.price * action.item.amount;
-//     return {
-//       items: updatedItems,
-//       totalAmount: updatedTotalAmount
-//     };
-//   }
-//   return defaultCartState;
-// };
+import { useState } from "react";
+import CartContext from "./cart-context";
 
 const CartProvider = (props) => {
-//   const [cartState, dispatchCartAction] = useReducer(cartReducer, defaultCartState);
+  const [items, setItems] = useState([]);
 
-//   const addItemToCartHandler = (item) => {
-//     dispatchCartAction({type: 'ADD', item: item});
-//   };
+  // ⬆ Add item — NO MERGING — ALWAYS push a new one
+  const addItemHandler = (item) => {
+    setItems((prevItems) => [...prevItems, item]);
+  };
 
-//   const removeItemFromCartHandler = (id) => {
-//     dispatchCartAction({type: 'REMOVE', id: id});
-//   };
+  // ➕ Increase quantity of an item inside the cart
+  const increaseQuantity = (id) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  };
 
-  const [items,updateItems]=useState([]);
-  const addItemToCartHandler=(item)=>{
-    updateItems([...items,item]);
-  }
+  // ➖ Decrease quantity of an item inside the cart
+  const decreaseQuantity = (id) => {
+    setItems((prevItems) =>
+      prevItems
+        .map((item) =>
+          item.id === id
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
 
-  const cartContext = {
-    items: items,
-    totalAmount: props.totalAmount,
-    addItem: addItemToCartHandler,
-    //removeItem: removeItemFromCartHandler,
+  const context = {
+    items,
+    addItem: addItemHandler,
+    increaseQuantity,
+    decreaseQuantity,
   };
 
   return (
-    <CartContext.Provider value={cartContext}>
+    <CartContext.Provider value={context}>
       {props.children}
     </CartContext.Provider>
   );
